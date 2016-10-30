@@ -1,0 +1,13 @@
+package com.chibatching.remotekonfig
+
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
+
+
+class RemoteKonfigBooleanDelegate
+internal constructor(private val key: String) : ReadOnlyProperty<Any, Boolean> {
+    override fun getValue(thisRef: Any, property: KProperty<*>): Boolean {
+        return FirebaseRemoteConfig.getInstance().getBoolean(key)
+    }
+}
