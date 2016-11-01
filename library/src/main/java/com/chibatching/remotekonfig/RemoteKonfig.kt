@@ -24,11 +24,19 @@ object RemoteKonfig {
 
     var cacheExpirationSeconds: Long = 43200L
 
-    internal fun setDefault(key: String, value: Any) {
-        defaultValues.put(key, value)
-    }
-
     fun register(vararg model: KonfigModel) {
+        model.forEach {
+            it.defaultsMap?.forEach { entry ->
+                if (!defaultValues.containsKey(entry.key)) {
+                    defaultValues.put(entry.key, entry.value)
+                    it.isRegistered = true
+                    it.defaultsMap = null
+                } else {
+                    throw IllegalArgumentException("Key ${entry.key} in ${it.javaClass.simpleName} is already registered.")
+                }
+            }
+        }
+
         FirebaseRemoteConfig.getInstance().setDefaults(defaultValues)
     }
 

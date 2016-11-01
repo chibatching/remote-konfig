@@ -1,27 +1,37 @@
 package com.chibatching.remotekonfig
 
+import java.util.*
+
 
 open class KonfigModel {
+
+    internal var isRegistered: Boolean = false
+    internal var defaultsMap: MutableMap<String, Any>? = null
+        get() = if (!isRegistered) {
+            field ?: HashMap<String, Any>()
+        } else {
+            null
+        }
 
     companion object {
 
         fun KonfigModel.konfig(key: String, default: Long): RemoteKonfigLongDelegate {
-            RemoteKonfig.setDefault(key, default)
+            defaultsMap?.put(key, default)
             return RemoteKonfigLongDelegate(key)
         }
 
         fun KonfigModel.konfig(key: String, default: String): RemoteKonfigStringDelegate {
-            RemoteKonfig.setDefault(key, default)
+            defaultsMap?.put(key, default)
             return RemoteKonfigStringDelegate(key)
         }
 
         fun KonfigModel.konfig(key: String, default: Double): RemoteKonfigDoubleDelegate {
-            RemoteKonfig.setDefault(key, default)
+            defaultsMap?.put(key, default)
             return RemoteKonfigDoubleDelegate(key)
         }
 
         fun KonfigModel.konfig(key: String, default: Boolean): RemoteKonfigBooleanDelegate {
-            RemoteKonfig.setDefault(key, default)
+            defaultsMap?.put(key, default)
             return RemoteKonfigBooleanDelegate(key)
         }
     }
