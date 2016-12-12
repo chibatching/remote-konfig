@@ -8,7 +8,10 @@ open class KonfigModel {
     internal var isRegistered: Boolean = false
     internal var defaultsMap: MutableMap<String, Any>? = null
         get() = if (!isRegistered) {
-            field ?: HashMap<String, Any>()
+            field ?: run {
+                field = HashMap<String, Any>()
+                field
+            }
         } else {
             null
         }
