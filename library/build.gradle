@@ -83,7 +83,7 @@ artifacts {
 def siteUrl = 'https://github.com/chibatching/remote-konfig'
 def gitUrl = 'https://github.com/chibatching/remote-konfig.git'
 
-group = "com.chibatching"
+group = "com.github.chibatching"
 
 install {
     repositories.mavenInstaller {
