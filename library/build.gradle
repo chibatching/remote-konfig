@@ -1,5 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'org.jetbrains.dokka-android'
+
+
+version = "0.0.2"
 
 android {
     compileSdkVersion 25
@@ -9,7 +14,7 @@ android {
         minSdkVersion 9
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -34,8 +39,84 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
 }
+
 repositories {
     mavenCentral()
 }
+
 buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.11'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+    }
+}
+
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+dokka {
+    outputFormat = 'javadoc'
+    moduleName = 'library'
+    linkMapping {
+        dir = "src/main/kotlin"
+        url = "https://github.com/chibatching/remote-konfig/tree/v$version/library/src/main/kotlin"
+        suffix = "#L"
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: dokka) {
+    classifier = 'javadoc'
+    from dokka.outputDirectory
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+
+def siteUrl = 'https://github.com/chibatching/remote-konfig'
+def gitUrl = 'https://github.com/chibatching/remote-konfig.git'
+
+group = "com.chibatching"
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+
+                name 'remote-konfig'
+                artifactId 'remote-konfig'
+
+                url siteUrl
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'chibatching'
+                        name 'chibatching'
+                        email 'chibatching.apps@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
 }
