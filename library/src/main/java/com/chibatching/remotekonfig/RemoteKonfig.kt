@@ -40,7 +40,11 @@ object RemoteKonfig {
         FirebaseRemoteConfig.getInstance().setDefaults(defaultValues)
     }
 
-    fun fetch(onComplete: (() -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) {
+    fun fetch(onComplete: (() -> Unit)? = null) {
+        fetch(onComplete, null)
+    }
+
+    fun fetch(onComplete: (() -> Unit)?, onFailure: ((Exception) -> Unit)?) {
         FirebaseRemoteConfig.getInstance()
                 .fetch(cacheExpirationSeconds)
                 .apply {
