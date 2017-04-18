@@ -5,8 +5,9 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 
-class RemoteKonfigStringDelegate
-internal constructor(private val key: String) : ReadOnlyProperty<Any, String> {
+class RemoteKonfigStringDelegate internal constructor(private val key: String, default: String)
+    : ReadOnlyProperty<Any, String>, RemoteKonfigDelegate<String>(key, default) {
+
     override fun getValue(thisRef: Any, property: KProperty<*>): String {
         return FirebaseRemoteConfig.getInstance().getString(key)
     }

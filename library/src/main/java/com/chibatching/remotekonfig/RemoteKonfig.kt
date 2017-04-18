@@ -25,19 +25,15 @@ object RemoteKonfig {
     var cacheExpirationSeconds: Long = 43200L
 
     fun register(vararg model: KonfigModel) {
-        model.forEach {
-            it.defaultsMap?.forEach { entry ->
-                if (!defaultValues.containsKey(entry.key)) {
-                    defaultValues.put(entry.key, entry.value)
-                    it.isRegistered = true
-                    it.defaultsMap = null
-                } else {
-                    throw IllegalArgumentException("Key ${entry.key} in ${it.javaClass.simpleName} is already registered.")
-                }
-            }
-        }
-
         FirebaseRemoteConfig.getInstance().setDefaults(defaultValues)
+    }
+
+    internal fun register(key: String, default: Any) {
+        if (defaultValues.containsKey(key)) {
+            throw IllegalArgumentException("Key $key is already registered.")
+        } else {
+            defaultValues.put(key, default)
+        }
     }
 
     fun fetch(onComplete: (() -> Unit)? = null) {
