@@ -30,11 +30,11 @@ object RemoteKonfig {
         FirebaseRemoteConfig.getInstance().setDefaults(defaultValues)
     }
 
-    internal fun register(key: String, default: Any) {
+    internal fun register(clazz: Class<out Any>, key: String, default: Any) {
         if (defaultValues.containsKey(key)) {
-            throw IllegalArgumentException("Key $key is already registered.")
+            throw IllegalArgumentException("Key $key of ${clazz.simpleName} is already registered.")
         } else {
-            defaultValues.put(key, default)
+            defaultValues[key] = default
         }
     }
 

@@ -6,9 +6,9 @@ import kotlin.reflect.KProperty
 
 
 class RemoteKonfigBooleanDelegate internal constructor(private val key: String, default: Boolean)
-    : ReadOnlyProperty<Any, Boolean>, RemoteKonfigDelegate<Boolean>(key, default) {
+    : ReadOnlyProperty<KonfigModel, Boolean>, RemoteKonfigDelegate<Boolean>(key, default) {
 
-    override fun getValue(thisRef: Any, property: KProperty<*>): Boolean {
+    override fun getValue(thisRef: KonfigModel, property: KProperty<*>): Boolean {
         return FirebaseRemoteConfig.getInstance().getBoolean(key)
     }
 }
