@@ -1,8 +1,10 @@
 package com.chibatching.remotekonfig
 
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 object RemoteKonfig {
@@ -36,17 +38,25 @@ object RemoteKonfig {
         }
     }
 
-    fun fetch(onComplete: (() -> Unit)? = null) {
-        fetch(onComplete, null)
+    fun fetchAsync(onComplete: (() -> Unit)? = null) {
+        fetchAsync(onComplete, null)
     }
 
-    fun fetch(onComplete: (() -> Unit)?, onFailure: ((Exception) -> Unit)?) {
+    fun fetchAsync(onComplete: (() -> Unit)?, onFailure: ((Exception) -> Unit)?) {
         FirebaseRemoteConfig.getInstance()
                 .fetch(cacheExpirationSeconds)
                 .apply {
                     addOnSuccessListener { onComplete?.invoke() }
                     addOnFailureListener { onFailure?.invoke(it) }
                 }
+    }
+
+    fun fetch(timeout: Long, timeUnit: TimeUnit) {
+        Tasks.await(FirebaseRemoteConfig.getInstance().fetch(), timeout, timeUnit)
+    }
+
+    fun fetch() {
+        Tasks.await(FirebaseRemoteConfig.getInstance().fetch())
     }
 
     fun activate() {

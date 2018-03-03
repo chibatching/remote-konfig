@@ -1,6 +1,7 @@
 package com.chibatching.remotekonfigsample
 
 import com.chibatching.remotekonfig.KonfigModel
+import com.chibatching.remotekonfig.konfig
 
 
 object OtherKonfig : KonfigModel {

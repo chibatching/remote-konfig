@@ -1,7 +1,7 @@
 package com.chibatching.remotekonfigsample
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.chibatching.remotekonfig.RemoteKonfig
 
@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
             developerMode = BuildConfig.DEBUG
             cacheExpirationSeconds = if (developerMode) 0L else 3600L
             register(SampleKonfig, OtherKonfig)
-            fetch(
+            fetchAsync(
                     {
                         Log.d(TAG, "fetch success")
                         activate()
