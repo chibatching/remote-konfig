@@ -1,3 +1,5 @@
+![jitpack](https://jitpack.io/v/chibatching/remote-konfig.svg)
+
 # remote-konfig
 
 ## Install
