@@ -58,7 +58,7 @@ dokka {
     moduleName = 'library'
     linkMapping {
         dir = "src/main/kotlin"
-        url = "https://github.com/chibatching/remote-konfig/tree/v$version/library/src/main/kotlin"
+        url = "https://github.com/chibatching/remote-konfig/tree/$version/library/src/main/kotlin"
         suffix = "#L"
     }
 }
