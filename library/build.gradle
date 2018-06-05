@@ -28,10 +28,8 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    compile "com.google.firebase:firebase-config:$firebaseVersion"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compileOnly "com.google.firebase:firebase-config:$firebaseVersion"
 
     testCompile 'junit:junit:4.12'
 }
