@@ -7,6 +7,10 @@ fun KonfigModel.konfig(key: String, default: Long): RemoteKonfigLongDelegate {
     return RemoteKonfigLongDelegate(key, default)
 }
 
+fun KonfigModel.konfig(key: String, default: Int): RemoteKonfigIntDelegate {
+    return RemoteKonfigIntDelegate(key, default)
+}
+
 fun KonfigModel.konfig(key: String, default: String): RemoteKonfigStringDelegate {
     return RemoteKonfigStringDelegate(key, default)
 }
