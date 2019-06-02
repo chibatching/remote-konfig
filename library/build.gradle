@@ -42,7 +42,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.17'
+        classpath 'org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.18'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
     }
 }

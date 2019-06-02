@@ -1,33 +1,58 @@
 package com.chibatching.remotekonfig
 
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 
 object RemoteKonfig {
 
     private val defaultValues: MutableMap<String, Any> = HashMap()
 
-    var developerMode: Boolean = false
-        set(value) {
-            field = value
-            FirebaseRemoteConfig.getInstance().apply {
-                FirebaseRemoteConfigSettings.Builder()
-                        .setDeveloperModeEnabled(value)
-                        .build()
-                        .let {
-                            setConfigSettings(it)
-                        }
-            }
+    /**
+     * Initialize Remote Config SDK with parameters.
+     * See [Firebase Docs](https://firebase.google.com/docs/reference/android/com/google/firebase/remoteconfig/FirebaseRemoteConfigSettings.Builder.html)
+     *
+     * @param minimumFetchIntervalInSeconds The minimum interval between successive fetch calls.
+     * @param fetchTimeoutInSeconds The connection timeout for fetch requests to the Firebase Remote Config servers in seconds.
+     */
+    suspend fun initialize(
+        minimumFetchIntervalInSeconds: Long = TimeUnit.HOURS.toSeconds(12L),
+        fetchTimeoutInSeconds: Long = 5L
+    ) = suspendCoroutine<Unit> { continuation ->
+        FirebaseRemoteConfig.getInstance().apply {
+            val config = FirebaseRemoteConfigSettings.Builder()
+                .setMinimumFetchIntervalInSeconds(minimumFetchIntervalInSeconds)
+                .setFetchTimeoutInSeconds(fetchTimeoutInSeconds)
+                .build()
+            setConfigSettingsAsync(config)
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
         }
+    }
 
-    var cacheExpirationSeconds: Long = 43200L
-
-    fun register(vararg model: KonfigModel) {
-        FirebaseRemoteConfig.getInstance().setDefaults(defaultValues)
+    /**
+     * Register KonfigModel to set default value to Remote Config
+     *
+     * @param model KonfigModel to register
+     */
+    @Suppress("UNUSED_PARAMETER")
+    suspend fun register(vararg model: KonfigModel) = suspendCoroutine<Unit> { continuation ->
+        FirebaseRemoteConfig.getInstance().setDefaultsAsync(defaultValues)
+            .addOnSuccessListener {
+                continuation.resume(Unit)
+            }
+            .addOnFailureListener {
+                continuation.resumeWithException(it)
+            }
     }
 
     internal fun register(clazz: Class<out Any>, key: String, default: Any) {
@@ -38,28 +63,30 @@ object RemoteKonfig {
         }
     }
 
-    fun fetchAsync(onComplete: (() -> Unit)? = null) {
-        fetchAsync(onComplete, null)
-    }
-
-    fun fetchAsync(onComplete: (() -> Unit)?, onFailure: ((Exception) -> Unit)?) {
+    /**
+     * Fetch remote values from Remote Config
+     */
+    suspend fun fetch() = suspendCoroutine<Unit> { continuation ->
         FirebaseRemoteConfig.getInstance()
-                .fetch(cacheExpirationSeconds)
-                .apply {
-                    addOnSuccessListener { onComplete?.invoke() }
-                    addOnFailureListener { onFailure?.invoke(it) }
-                }
+            .fetch()
+            .addOnSuccessListener {
+                continuation.resume(Unit)
+            }
+            .addOnFailureListener {
+                continuation.resumeWithException(it)
+            }
     }
 
-    fun fetch(timeout: Long, timeUnit: TimeUnit) {
-        Tasks.await(FirebaseRemoteConfig.getInstance().fetch(), timeout, timeUnit)
-    }
-
-    fun fetch() {
-        Tasks.await(FirebaseRemoteConfig.getInstance().fetch())
-    }
-
-    fun activate() {
-        FirebaseRemoteConfig.getInstance().activateFetched()
+    /**
+     * Activate fetched remote values
+     */
+    suspend fun activate() = suspendCoroutine<Boolean> { continuation ->
+        FirebaseRemoteConfig.getInstance().activate()
+            .addOnSuccessListener {
+                continuation.resume(it)
+            }
+            .addOnFailureListener {
+                continuation.resumeWithException(it)
+            }
     }
 }
