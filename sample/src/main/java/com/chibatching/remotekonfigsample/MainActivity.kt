@@ -1,11 +1,20 @@
 package com.chibatching.remotekonfigsample
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import com.chibatching.remotekonfig.RemoteKonfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+
+    private val job = SupervisorJob()
+
+    private val coroutineContext = Dispatchers.Main + job
+
+    private val lifecycleScope = CoroutineScope(coroutineContext)
 
     companion object {
         private const val TAG = "MainActivity"
@@ -15,20 +24,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        RemoteKonfig.apply {
-            developerMode = BuildConfig.DEBUG
-            cacheExpirationSeconds = if (developerMode) 0L else 3600L
-            register(SampleKonfig, OtherKonfig)
-            fetchAsync(
-                    {
-                        Log.d(TAG, "fetch success")
-                        activate()
-                    },
-                    { e ->
-                        Log.d(TAG, "fetch failure")
-                        e.printStackTrace()
-                    }
+        lifecycleScope.launch {
+            RemoteKonfig.initialize(
+                minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 0L else 3600L
             )
+            RemoteKonfig.register(SampleKonfig, OtherKonfig)
+            RemoteKonfig.fetch()
+            RemoteKonfig.activate()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 }
