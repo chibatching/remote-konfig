@@ -30,7 +30,7 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compileOnly "com.google.firebase:firebase-config:$firebaseVersion"
 
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 repositories {
@@ -49,7 +49,7 @@ buildscript {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier.set('sources')
 }
 
 dokka {
@@ -63,7 +63,7 @@ dokka {
 }
 
 task javadocJar(type: Jar, dependsOn: dokka) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from dokka.outputDirectory
 }
 
