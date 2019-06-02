@@ -5,5 +5,5 @@
 ## Install
 
 ```groovy
-implementation 'com.github.chibatching:remote-konfig:0.0.5'
+implementation 'com.github.chibatching:remote-konfig:0.1.0'
 ```
