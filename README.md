@@ -8,7 +8,7 @@ Easy wrapper library for Firebase Remote Config.
 
 ```groovy
 implementation 'com.google.firebase:firebase-config-ktx:21.0.1'
-implementation 'com.github.chibatching:remote-konfig:0.2.0'
+implementation 'com.github.chibatching:remote-konfig:0.2.1'
 ```
 
 ## How to use
@@ -32,33 +32,20 @@ You can declare multiple KonfigModel to group and organize remote config values.
 
 ### Initialize RemoteKonfig
 
-Initialize function should be called from coroutine.
-
-```kotlin
-launch {
-    RemoteKonfig.initialize()
-}
-```
-
+To setup default value, register your KonfigModel via `registerModels`
 If you want to change some parameter of [Remote Config](https://firebase.google.com/docs/reference/android/com/google/firebase/remoteconfig/FirebaseRemoteConfigSettings.Builder.html)
 
 ```kotlin
-launch {
-    RemoteKonfig.initialize(
-        minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 0L else 3600L
-    )
+RemoteKonfig.initialize {
+    minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 0L else 3600L
+    registerModels(SomeConfig)
 }
 ```
 
-### Register KonfigModel
-
-To setup default value, register KonfigModel
-
-```kotlin
-RemoteKonfig.register(SomeConfig)
-```
-
 ### Fetch and activate
+
+Fetch and activate is automatically executed in initialize.
+But if you want to do manually, you can do it.
 
 ```kotlin
 RemoteKonfig.fetch()
@@ -68,7 +55,7 @@ RemoteKonfig.activate()
 ## License
 
 ```
-Copyright 2016-2019 Takao Chiba
+Copyright 2016-2021 Takao Chiba
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
