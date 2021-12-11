@@ -1,9 +1,10 @@
 package com.chibatching.remotekonfig
 
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
-import java.util.*
-import java.util.concurrent.TimeUnit
+import android.util.Log
+import com.google.android.gms.tasks.Task
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -13,51 +14,51 @@ object RemoteKonfig {
 
     private val defaultValues: MutableMap<String, Any> = HashMap()
 
-    /**
-     * Initialize Remote Config SDK with parameters.
-     * See [Firebase Docs](https://firebase.google.com/docs/reference/android/com/google/firebase/remoteconfig/FirebaseRemoteConfigSettings.Builder.html)
-     *
-     * @param minimumFetchIntervalInSeconds The minimum interval between successive fetch calls.
-     * @param fetchTimeoutInSeconds The connection timeout for fetch requests to the Firebase Remote Config servers in seconds.
-     */
-    suspend fun initialize(
-        minimumFetchIntervalInSeconds: Long = TimeUnit.HOURS.toSeconds(12L),
-        fetchTimeoutInSeconds: Long = 5L
-    ) = suspendCoroutine<Unit> { continuation ->
-        FirebaseRemoteConfig.getInstance().apply {
-            val config = FirebaseRemoteConfigSettings.Builder()
-                .setMinimumFetchIntervalInSeconds(minimumFetchIntervalInSeconds)
-                .setFetchTimeoutInSeconds(fetchTimeoutInSeconds)
-                .build()
-            setConfigSettingsAsync(config)
-                .addOnSuccessListener {
-                    continuation.resume(Unit)
+    class Builder {
+
+        /**
+         * Initialize Remote Config SDK with parameters.
+         * See [Firebase Docs](https://firebase.google.com/docs/reference/android/com/google/firebase/remoteconfig/FirebaseRemoteConfigSettings.Builder.html)
+         */
+        var minimumFetchIntervalInSeconds: Long? = null
+
+        /**
+         * Initialize Remote Config SDK with parameters.
+         * See [Firebase Docs](https://firebase.google.com/docs/reference/android/com/google/firebase/remoteconfig/FirebaseRemoteConfigSettings.Builder.html)
+         */
+        var fetchTimeoutInSeconds: Long? = null
+
+        /**
+         * Register KonfigModel to set default value to Remote Config
+         *
+         * @param model KonfigModel to register
+         */
+        @Suppress("unused")
+        fun registerModels(vararg model: KonfigModel) = Unit
+    }
+
+    fun initialize(block: Builder.() -> Unit): Task<Boolean> {
+        val builder = Builder()
+        block(builder)
+
+        Firebase.remoteConfig.apply {
+            val config = remoteConfigSettings {
+                builder.minimumFetchIntervalInSeconds?.let { minimumFetchIntervalInSeconds = it }
+                builder.fetchTimeoutInSeconds?.let { fetchTimeoutInSeconds = it }
+            }
+            return setConfigSettingsAsync(config)
+                .continueWithTask {
+                    setDefaultsAsync(defaultValues)
                 }
-                .addOnFailureListener {
-                    continuation.resumeWithException(it)
+                .continueWithTask {
+                    fetchAndActivate()
                 }
         }
     }
 
-    /**
-     * Register KonfigModel to set default value to Remote Config
-     *
-     * @param model KonfigModel to register
-     */
-    @Suppress("UNUSED_PARAMETER")
-    suspend fun register(vararg model: KonfigModel) = suspendCoroutine<Unit> { continuation ->
-        FirebaseRemoteConfig.getInstance().setDefaultsAsync(defaultValues)
-            .addOnSuccessListener {
-                continuation.resume(Unit)
-            }
-            .addOnFailureListener {
-                continuation.resumeWithException(it)
-            }
-    }
-
     internal fun register(clazz: Class<out Any>, key: String, default: Any) {
         if (defaultValues.containsKey(key)) {
-            throw IllegalArgumentException("Key $key of ${clazz.simpleName} is already registered.")
+            Log.w("RemoteKonfig", "Key $key of ${clazz.simpleName} is already registered.")
         } else {
             defaultValues[key] = default
         }
@@ -67,8 +68,7 @@ object RemoteKonfig {
      * Fetch remote values from Remote Config
      */
     suspend fun fetch() = suspendCoroutine<Unit> { continuation ->
-        FirebaseRemoteConfig.getInstance()
-            .fetch()
+        Firebase.remoteConfig.fetch()
             .addOnSuccessListener {
                 continuation.resume(Unit)
             }
@@ -81,7 +81,7 @@ object RemoteKonfig {
      * Activate fetched remote values
      */
     suspend fun activate() = suspendCoroutine<Boolean> { continuation ->
-        FirebaseRemoteConfig.getInstance().activate()
+        Firebase.remoteConfig.activate()
             .addOnSuccessListener {
                 continuation.resume(it)
             }

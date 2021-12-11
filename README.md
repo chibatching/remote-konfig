@@ -7,7 +7,8 @@ Easy wrapper library for Firebase Remote Config.
 ## Install
 
 ```groovy
-implementation 'com.github.chibatching:remote-konfig:0.1.0'
+implementation 'com.google.firebase:firebase-config-ktx:21.0.1'
+implementation 'com.github.chibatching:remote-konfig:0.2.0'
 ```
 
 ## How to use

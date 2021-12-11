@@ -1,17 +1,16 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'org.jetbrains.dokka-android'
+apply plugin: 'maven-publish'
+apply plugin: 'org.jetbrains.dokka'
 
-
-version = "0.1.0"
+version = "0.2.0"
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 31
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -27,23 +26,19 @@ android {
 }
 
 dependencies {
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    compileOnly "com.google.firebase:firebase-config:$firebaseVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "com.google.firebase:firebase-config-ktx:$firebaseVersion"
 
-    testImplementation 'junit:junit:4.12'
-}
-
-repositories {
-    mavenCentral()
+    testImplementation 'junit:junit:4.13.2'
 }
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
+        google()
     }
     dependencies {
-        classpath 'org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.18'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.6.0"
     }
 }
 
@@ -52,19 +47,9 @@ task sourcesJar(type: Jar) {
     archiveClassifier.set('sources')
 }
 
-dokka {
-    outputFormat = 'javadoc'
-    moduleName = 'library'
-    linkMapping {
-        dir = "src/main/kotlin"
-        url = "https://github.com/chibatching/remote-konfig/tree/$version/library/src/main/kotlin"
-        suffix = "#L"
-    }
-}
-
-task javadocJar(type: Jar, dependsOn: dokka) {
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
     archiveClassifier.set('javadoc')
-    from dokka.outputDirectory
+    from dokkaJavadoc.outputDirectory
 }
 
 artifacts {
@@ -78,35 +63,40 @@ def gitUrl = 'https://github.com/chibatching/remote-konfig.git'
 
 group = "com.github.chibatching"
 
-install {
-    repositories.mavenInstaller {
-        // This generates POM.xml with proper parameters
-        pom {
-            project {
-                packaging 'aar'
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
 
-                name 'remote-konfig'
-                artifactId 'remote-konfig'
+                artifact javadocJar
+                artifact sourcesJar
 
-                url siteUrl
+                pom {
+                    artifactId "remote-konfig"
+                    name = "remote-konfig"
 
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    packaging 'aar'
+                    url = siteUrl
+
+                    licenses {
+                        license {
+                            name = 'The Apache Software License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
                     }
-                }
-                developers {
-                    developer {
-                        id 'chibatching'
-                        name 'chibatching'
-                        email 'chibatching.apps@gmail.com'
+                    developers {
+                        developer {
+                            id = 'chibatching'
+                            name = 'Takao Chiba'
+                            email = 'takao.chiba@gmail.com'
+                        }
                     }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
+                    scm {
+                        connection = gitUrl
+                        developerConnection = gitUrl
+                        url = siteUrl
+                    }
                 }
             }
         }
